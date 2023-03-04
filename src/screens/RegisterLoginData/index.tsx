@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Alert, KeyboardAvoidingView, Platform } from 'react-native';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { RFValue } from 'react-native-responsive-fontsize';
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -42,9 +42,7 @@ export function RegisterLoginData() {
   const {
     control,
     handleSubmit,
-    formState: {
-      errors
-    }
+    formState: { errors }
   } = useForm({
     resolver: yupResolver(schema)
   });
@@ -57,6 +55,16 @@ export function RegisterLoginData() {
 
     const dataKey = '@savepass:logins';
 
+    const response =  await AsyncStorage.getItem(dataKey);
+    const parsedData = JSON.parse(response) || [];
+
+    const newLoginListData = [
+      ...parsedData,
+      newLoginData,
+    ];
+
+    await AsyncStorage.setItem(dataKey, JSON.stringify(newLoginListData));
+    navigate('Home')
     // Save data on AsyncStorage and navigate to 'Home' screen
   }
 
@@ -70,38 +78,31 @@ export function RegisterLoginData() {
       <Container>
         <Form>
           <Input
-            testID="service-name-input"
+            
             title="Nome do serviço"
             name="service_name"
-            error={
-              // Replace here with real content
-              'Has error ? show error message'
-            }
+            error={String(errors.service_name?.message)}
             control={control}
             autoCapitalize="sentences"
             autoCorrect
           />
+          
           <Input
             testID="email-input"
             title="E-mail ou usuário"
             name="email"
-            error={
-              // Replace here with real content
-              'Has error ? show error message'
-            }
+            error={String(errors.email?.message)}
             control={control}
             autoCorrect={false}
             autoCapitalize="none"
             keyboardType="email-address"
           />
+
           <Input
             testID="password-input"
             title="Senha"
             name="password"
-            error={
-              // Replace here with real content
-              'Has error ? show error message'
-            }
+            error={String(errors.password?.message)}
             control={control}
             secureTextEntry
           />
